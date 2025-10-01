@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 
 type Job = {
   title: string;
@@ -17,6 +18,10 @@ export default function SearchPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [missingOut, setMissingOut] = useState(false);
   const [isPro, setIsPro] = useState(false);
+
+  useEffect(() => {
+    setIsPro(localStorage.getItem("jobcatcher_is_pro") === "true");
+  }, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,25 +76,64 @@ export default function SearchPage() {
             marginBottom: 18,
           }}
         >
-          <h1 style={{ margin: 0, fontSize: 32, color: "#1e293b" }}>
-            JobCatcher
-          </h1>
-          <label
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 15,
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={isPro}
-              onChange={() => setIsPro((v) => !v)}
-              style={{ accentColor: "#6366f1" }}
-            />
-            Pro (dev toggle)
-          </label>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <h1 style={{ margin: 0, fontSize: 32, color: "#1e293b" }}>
+              JobCatcher
+            </h1>
+            {isPro && (
+              <span
+                style={{
+                  fontSize: 12,
+                  background: "#22c55e",
+                  color: "white",
+                  padding: "2px 8px",
+                  borderRadius: 999,
+                }}
+              >
+                PRO
+              </span>
+            )}
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            {/* keep your dev toggle for now */}
+            <label
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 15,
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={isPro}
+                onChange={(e) => {
+                  localStorage.setItem(
+                    "jobcatcher_is_pro",
+                    String(e.target.checked)
+                  );
+                  setIsPro(e.target.checked);
+                }}
+                style={{ accentColor: "#6366f1" }}
+              />
+              Pro (dev toggle)
+            </label>
+
+            <Link
+              href="/billing"
+              style={{
+                padding: "8px 14px",
+                borderRadius: 10,
+                border: "1px solid #e0e7ff",
+                textDecoration: "none",
+                color: "#1e293b",
+                background: "white",
+              }}
+            >
+              Billing
+            </Link>
+          </div>
         </header>
 
         <p style={{ marginTop: 0, color: "#475569", fontSize: 16 }}>
@@ -165,6 +209,23 @@ export default function SearchPage() {
           >
             <strong>You&apos;re missing out!</strong> Fresh roles (&lt;24h)
             exist for this search but are hidden without Pro.
+            <span style={{ display: "block", marginTop: 10 }}>
+              <a
+                href="/billing"
+                style={{
+                  color: "white",
+                  textDecoration: "underline",
+                  fontWeight: 600,
+                  fontSize: 15,
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                }}
+              >
+                Upgrade now →
+              </a>
+            </span>
           </div>
         )}
 

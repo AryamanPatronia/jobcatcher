@@ -77,6 +77,19 @@ export default function Landing() {
         >
           Tip: On the search page, toggle “Pro” to preview the Pro experience.
         </p>
+        <p style={{ marginTop: 16 }}>
+          <a
+            href="/billing"
+            style={{
+              color: "#6366f1",
+              textDecoration: "underline",
+              fontWeight: 500,
+              fontSize: 15,
+            }}
+          >
+            See Pro pricing
+          </a>
+        </p>
       </div>
     </main>
   );
