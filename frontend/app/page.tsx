@@ -1,175 +1,83 @@
-"use client";
-
-import { useState } from "react";
-
-type Job = {
-  title: string;
-  company: string;
-  location: string;
-  posted_at: string;
-  age_hours: number;
-  url: string;
-};
-
-export default function Home() {
-  const [q, setQ] = useState("python");
-  const [loc, setLoc] = useState("london");
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [missingOut, setMissingOut] = useState(false);
-  const [isPro, setIsPro] = useState(false); // mock (we'll wire real auth/billing later)
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function doSearch() {
-    setLoading(true);
-    setError(null);
-    setMissingOut(false);
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE}/search?q=${encodeURIComponent(
-          q
-        )}&location=${encodeURIComponent(loc)}&limit=50`
-      );
-      if (!res.ok) throw new Error(`API ${res.status}`);
-      const data = await res.json();
-      setJobs(data.results || []);
-      setMissingOut(Boolean(data.has_hidden_fresh));
-    } catch (e: any) {
-      setError(e.message || "Failed to fetch");
-    } finally {
-      setLoading(false);
-    }
-  }
-
+export default function Landing() {
   return (
-    <main style={{ maxWidth: 900, margin: "40px auto", padding: 16 }}>
-      <header
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%)",
+        fontFamily: "Inter, sans-serif",
+      }}
+    >
+      <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 12,
+          background: "white",
+          borderRadius: 18,
+          boxShadow: "0 4px 24px rgba(0,0,0,0.07)",
+          padding: "48px 36px",
+          maxWidth: 420,
+          textAlign: "center",
         }}
       >
-        <h1 style={{ margin: 0 }}>JobCatcher</h1>
-        <label style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-          <input
-            type="checkbox"
-            checked={isPro}
-            onChange={() => setIsPro((v) => !v)}
-          />
-          Pro (dev toggle)
-        </label>
-      </header>
-
-      <p style={{ marginTop: 0 }}>
-        Free: last week • Pro: includes today&apos;s fresh jobs (&lt;24h)
-      </p>
-
-      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="keywords (e.g. python)"
+        <h1
           style={{
-            flex: 1,
-            padding: 8,
-            border: "1px solid #ddd",
-            borderRadius: 8,
+            fontSize: 40,
+            fontWeight: 700,
+            marginBottom: 12,
+            letterSpacing: "-1px",
+            color: "#1e293b",
           }}
-        />
-        <input
-          value={loc}
-          onChange={(e) => setLoc(e.target.value)}
-          placeholder="location (e.g. london)"
-          style={{
-            width: 220,
-            padding: 8,
-            border: "1px solid #ddd",
-            borderRadius: 8,
-          }}
-        />
-        <button
-          onClick={doSearch}
-          disabled={loading}
-          style={{ padding: "8px 16px", borderRadius: 8 }}
         >
-          {loading ? "Searching..." : "Search"}
-        </button>
+          JobCatcher
+        </h1>
+        <p
+          style={{
+            fontSize: 18,
+            color: "#475569",
+            marginBottom: 28,
+            lineHeight: 1.5,
+          }}
+        >
+          <span style={{ fontWeight: 500 }}>
+            Catch jobs before anyone else.
+          </span>
+          <br />
+          <span style={{ opacity: 0.8 }}>
+            <strong>Free:</strong> last week’s jobs.
+            <br />
+            <strong>Pro:</strong> today’s fresh jobs.
+          </span>
+        </p>
+        <a
+          href="/search"
+          style={{
+            display: "inline-block",
+            background: "linear-gradient(90deg, #6366f1 0%, #3b82f6 100%)",
+            color: "white",
+            fontWeight: 600,
+            padding: "12px 28px",
+            borderRadius: 10,
+            fontSize: 17,
+            textDecoration: "none",
+            boxShadow: "0 2px 8px rgba(99,102,241,0.08)",
+            transition: "background 0.2s",
+          }}
+        >
+          Find fresh jobs →
+        </a>
+        <p
+          style={{
+            marginTop: 22,
+            fontSize: 13,
+            color: "#64748b",
+            opacity: 0.8,
+          }}
+        >
+          Tip: On the search page, toggle “Pro” to preview the Pro experience.
+        </p>
       </div>
-
-      {error && <div style={{ marginTop: 12, color: "#b00020" }}>{error}</div>}
-
-      {missingOut && !isPro && (
-        <div
-          style={{
-            marginTop: 16,
-            padding: 12,
-            background: "#000000eb",
-            border: "1px solid #000000ff",
-            borderRadius: 8,
-          }}
-        >
-          <strong>You&apos;re missing out!</strong> Fresh roles (&lt;24h) exist
-          for this search but are hidden without Pro.
-        </div>
-      )}
-
-      <ul style={{ marginTop: 20, listStyle: "none", padding: 0 }}>
-        {jobs
-          .filter((j) => (isPro ? true : j.age_hours >= 24)) // Free hides <24h
-          .map((j, i) => (
-            <li
-              key={`${j.title}-${i}`}
-              style={{
-                padding: 12,
-                border: "1px solid #eee",
-                borderRadius: 8,
-                marginBottom: 10,
-                position: "relative",
-              }}
-            >
-              {!isPro && j.age_hours < 24 && (
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "rgba(255,255,255,0.7)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backdropFilter: "blur(2px)",
-                    borderRadius: 8,
-                  }}
-                >
-                  <span>Locked — Pro only (&lt;24h)</span>
-                </div>
-              )}
-              <a
-                href={j.url}
-                target="_blank"
-                rel="noreferrer"
-                style={{ fontWeight: 600, textDecoration: "underline" }}
-              >
-                {j.title}
-              </a>
-              <div>
-                {j.company} • {j.location}
-              </div>
-              <div style={{ fontSize: 12, opacity: 0.7 }}>
-                {j.age_hours < 24
-                  ? `${j.age_hours}h ago`
-                  : `${Math.floor(j.age_hours / 24)}d ago`}
-              </div>
-            </li>
-          ))}
-      </ul>
-
-      {jobs.length === 0 && !loading && (
-        <div style={{ marginTop: 24, opacity: 0.7 }}>
-          Try a search to see results.
-        </div>
-      )}
     </main>
   );
 }
